@@ -1,78 +1,70 @@
 import './css/styles.css';
 import debounce from 'lodash.debounce';
 import { Notify } from 'notiflix';
+import { fetchCountries } from './fetchCountries';
 
 const DEBOUNCE_DELAY = 300;
 const input = document.querySelector('input#search-box');
 const countryList = document.querySelector('.country-list');
+const countryInfo = document.querySelector('.country-info');
 
-const API_LINK = 'https://restcountries.com/v3.1/';
-const API_FIELDS = '?fields=name,capital,population,flags,languages';
-const URL =
-  'https://restcountries.com/v3.1/all?fields=name,capital,population,flags,languages';
-
-const fetchCountries = name => {
-  fetch(URL)
-    .then(res => {
-      if (!res.ok) {
-        throw new Error(res.status);
-      }
-      return res.json();
-    })
-    .then(res => {
-      const countries = res.filter(country =>
-        country.name.official.includes(input.value)
-      );
-      console.log(countries);
-      console.log(countries.length);
-      if (countries.length > 10) {
-        Notify.info(
-          'Too many matches found. Please enter a more specific name.'
+function handleInput() {
+  clearItems();
+  if (input.value.trim() === '') {
+    return;
+  } else {
+    fetchCountries(input.value.trim())
+      .then(res => {
+        const countries = res.filter(country =>
+          country.name.common
+            .toLowerCase()
+            .includes(input.value.trim().toLowerCase())
         );
-      } else if (countries.length <= 10 && countries.length > 1) {
-        console.log('lista max 10');
-        countries.forEach(country => {
-          renderCountryList(country);
-        });
-      } else {
-        console.log('opis kraju');
-        countries.forEach(country => console.log(country));
-      }
-    })
-    .catch(err => {
-      console.log(err);
-      Notify.failure('Oops, there is no country with that name');
-    });
-};
-
-input.addEventListener(
-  'input',
-  debounce(() => {
-    fetchCountries();
-  }, DEBOUNCE_DELAY)
-);
+        if (countries.length > 10) {
+          Notify.info(
+            'Too many matches found. Please enter a more specific name.'
+          );
+        } else if (countries.length <= 10 && countries.length > 1) {
+          countries.forEach(country => renderCountryList(country));
+        } else if (countries.length === 1) {
+          countries.forEach(country => renderCountryInfo(country));
+        } else {
+          Notify.failure('Oops, there is no country with that name');
+        }
+      })
+      .catch(err => {
+        console.log(err);
+        Notify.failure('Oops, there is no country with that name');
+      });
+  }
+}
 
 function renderCountryList(country) {
   countryList.insertAdjacentHTML(
     'beforeend',
     `<li class="country-list__item">
-        <img src="${country.flags.svg}" alt="${country.flags.svg}"/>
-        <p>${country.name.common}</p>
-       </li>`
+          <img src="${country.flags.svg}" alt="${country.flags.svg}"/>
+          <p>${country.name.common}</p>
+         </li>`
   );
 }
 
-function renderCountryDesc(countries, name) {
-  const markup = countries
-    .filter(country => country.name.official.includes(name))
-    .map(country => {
-      return `<li>
-          <p><b>Name</b>: ${country.name.official}</p>
-          <p><b>Capital</b>: ${country.capital}</p>
-          <p><b>Population</b>: ${country.population}</p>
-          <p><b>Languages</b>: ${country.languages}</p>
-        </li>`;
-    })
-    .join('');
-  countryList.innerHTML = markup;
+function renderCountryInfo(country) {
+  countryInfo.innerHTML = `
+    <div class="container">
+      <img src="${country.flags.svg}" alt="${country.flags.svg}"/>
+      <h2>${country.name.common}</h2></div>
+      <p><span class="bold">Capital:&nbsp;</span>${country.capital}</p>
+      <p><span class="bold">Population:&nbsp;</span>${country.population}</p>
+      <p><span class="bold">Languages:&nbsp;</span>${Object.values(
+        country.languages
+      )}</>
+      `;
 }
+
+function clearItems() {
+  countryList.innerHTML = '';
+  countryInfo.innerHTML = '';
+}
+
+input.addEventListener('input', debounce(handleInput, DEBOUNCE_DELAY));

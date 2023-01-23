@@ -10,6 +10,7 @@ body {
   background-color: #fafafa;
   color: #212121;
   line-height: 1.5;
+  background-color: bisque;
 }
 
 #search-box {
@@ -17,4 +18,55 @@ body {
   padding: 8px;
   max-width: 320px;
   margin-bottom: 16px;
+}
+
+.country-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.country-list__item {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.country-list__item img {
+  width: 40px;
+  height: auto;
+}
+
+.country-list__item p {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.country-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.country-info img {
+  width: 40px;
+}
+
+.country-info p {
+  margin: 8px 0;
+}
+
+.bold {
+  font-weight: 700;
 }
