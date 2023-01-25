@@ -14,22 +14,15 @@ function handleInput() {
     return;
   } else {
     fetchCountries(input.value.trim())
-      .then(res => {
-        const countries = res.filter(country =>
-          country.name.common
-            .toLowerCase()
-            .includes(input.value.trim().toLowerCase())
-        );
+      .then(countries => {
         if (countries.length > 10) {
           Notify.info(
             'Too many matches found. Please enter a more specific name.'
           );
         } else if (countries.length <= 10 && countries.length > 1) {
           countries.forEach(country => renderCountryList(country));
-        } else if (countries.length === 1) {
-          countries.forEach(country => renderCountryInfo(country));
         } else {
-          Notify.failure('Oops, there is no country with that name');
+          countries.forEach(country => renderCountryInfo(country));
         }
       })
       .catch(err => {
